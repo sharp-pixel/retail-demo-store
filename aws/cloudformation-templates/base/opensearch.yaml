@@ -23,7 +23,7 @@ Resources:
   OpenSearchDomain:
     Type: AWS::OpenSearchService::Domain
     Properties:
-      EngineVersion: OpenSearch_1.2
+      EngineVersion: OpenSearch_1.3
       ClusterConfig:
         InstanceCount: 1
         InstanceType: t3.small.search
@@ -32,7 +32,7 @@ Resources:
         EBSEnabled: true
         Iops: 0
         VolumeSize: 10
-        VolumeType: gp2
+        VolumeType: gp3
       AccessPolicies:
         Version: 2012-10-17
         Statement:
