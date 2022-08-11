@@ -5,7 +5,7 @@
 # as some runtime dependencies such as product images and seed data for loading
 # products and categories into DDB and CSVs for training Personalize models.
 #
-# Exammple usage:
+# Example usage:
 # ./stage.sh S3_BUCKET [OPTIONAL_S3_PATH/] [--private-s3] [--only-cfn-template] [--skip-generators]
 #
 # The S3_BUCKET/OPTIONAL_S3_PATH is where all resources and templates will be uploaded.
