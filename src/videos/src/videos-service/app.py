@@ -1,10 +1,12 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-# AWS X-ray support
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-from aws_xray_sdk.core import patch_all
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 import logging
 import json
@@ -20,10 +22,13 @@ import srt
 from flask import Flask, jsonify, Response
 from flask_cors import CORS
 
+# OpenTelemetry setup
+trace.set_tracer_provider(TracerProvider())
+otlp_exporter = OTLPSpanExporter()
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
 
-patch_all()
-
-xray_recorder.begin_segment("Videos-init")
+tracer = trace.get_tracer(__name__)
 
 
 # -- Environment variables - defined by CloudFormation when deployed

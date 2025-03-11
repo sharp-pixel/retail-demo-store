@@ -1,9 +1,14 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 import os
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-from aws_xray_sdk.core import patch_all
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.instrumentation.boto3 import Boto3Instrumentation
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -34,9 +39,25 @@ class ProductionConfig(Config):
 
     @staticmethod
     def init_app(app):
-        patch_all()
-        xray_recorder.configure(service='Products Service')
-        XRayMiddleware(app, xray_recorder)
+        # Set up OpenTelemetry
+        resource = Resource(attributes={
+            SERVICE_NAME: "Products Service"
+        })
+        
+        # Initialize tracing and an exporter that can send data to AWS X-Ray
+        provider = TracerProvider(resource=resource)
+        processor = BatchSpanProcessor(OTLPSpanExporter())
+        provider.add_span_processor(processor)
+        trace.set_tracer_provider(provider)
+        
+        # Instrument Flask
+        FlaskInstrumentor().instrument_app(app)
+        
+        # Instrument requests library
+        RequestsInstrumentor().instrument()
+        
+        # Instrument AWS SDK
+        Boto3Instrumentation().instrument()
 
 config = {
     'Development': Development,

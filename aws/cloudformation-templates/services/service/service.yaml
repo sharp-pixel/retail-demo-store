@@ -295,6 +295,7 @@ Resources:
 
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSCloudMapDiscoverInstanceAccess
+        - arn:aws:iam::aws:policy/AmazonPrometheusRemoteWriteAccess
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
 
   LogGroup:
@@ -336,11 +337,16 @@ Resources:
       ExecutionRoleArn: !GetAtt 'TaskExecutionRole.Arn' #fix E3008 
       TaskRoleArn: !Ref TaskRole
       ContainerDefinitions:
-        - Name: X-ray
-          Image: public.ecr.aws/xray/aws-xray-daemon:alpha
+        - Name: aws-otel-collector
+          Image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+          Command: 
+            - "--config=/etc/ecs/container-insights/otel-task-metrics-config.yaml"
+          Essential: true
           PortMappings:
-            - ContainerPort: 2000
-              Protocol: udp
+            - ContainerPort: 4317
+              Protocol: tcp
+            - ContainerPort: 4318
+              Protocol: tcp
         - Name: !Ref ServiceName
           Image: !Ref ContainerImage
           Essential: true
@@ -401,8 +407,10 @@ Resources:
               Value: 'RetailDemoStore-PersonalizePreCreateScheduledRule'
             - Name: PINPOINT_APP_ID
               Value: !Ref PinpointAppId
-            - Name: AWS_DEFAULT_REGION
-              Value: !Ref "AWS::Region"
+            - Name: OTEL_EXPORTER_OTLP_ENDPOINT
+              Value: http://localhost:4317
+            - Name: OTEL_RESOURCE_ATTRIBUTES
+              Value: !Sub service.name=${ServiceName},service.namespace=retaildemostore
             - Name: COGNITO_USER_POOL_ID
               Value: !Ref UserPoolId
             - Name: COGNITO_USER_POOL_CLIENT_ID

@@ -1,7 +1,11 @@
 annotated-types==0.6.0
 anthropic-bedrock==0.8.0
 anyio==3.7.1
-aws-xray-sdk==2.14.0
+opentelemetry-api==1.30.0
+opentelemetry-sdk==1.30.0
+opentelemetry-instrumentation-flask==0.51b0
+opentelemetry-instrumentation-requests==0.51b0
+opentelemetry-exporter-otlp==1.30.0
 blinker==1.9.0
 boto3==1.35.71
 botocore==1.35.71

@@ -1,7 +1,7 @@
 # Docker compose file for local development.
 # Initialize your local environment variables either in your shell
 # or in the ".env" file.
-version: "3.7"
+# version: "3.7"
 services:
   carts:
     container_name: carts
@@ -88,7 +88,7 @@ services:
       - PRODUCT_SERVICE_PORT
       - OFFERS_SERVICE_HOST
       - OFFERS_SERVICE_PORT
-      - AWS_XRAY_DAEMON_ADDRESS=xray:2000
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN
@@ -209,7 +209,7 @@ services:
       - RESOURCE_BUCKET
       - PARAMETER_IVS_VIDEO_CHANNEL_MAP
       - USE_DEFAULT_IVS_STREAMS
-      - AWS_XRAY_DAEMON_ADDRESS=xray:2000
+      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN
@@ -219,10 +219,12 @@ services:
     ports:
       - "8007:80"
 
-  xray:
-    image: amazon/aws-xray-daemon
-    ports:
-    - "2000:2000/udp"
+  otel-collector:
+    image: amazon/aws-otel-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ~/.aws/:/home/.aws:ro
     environment:
       - AWS_PROFILE
       - AWS_DEFAULT_REGION
@@ -231,10 +233,11 @@ services:
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN
       - HOME=/home
+    ports:
+      - "4317:4317"
+      - "4318:4318"
     networks:
       - dev-net
-    volumes:
-      - ~/.aws/:/home/.aws:ro
 
   swagger-ui:
     container_name: swagger-ui

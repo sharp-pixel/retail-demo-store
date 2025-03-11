@@ -140,7 +140,7 @@ import swal from 'sweetalert';
 import Layout from '@/components/Layout/Layout.vue'
 import AbandonCartButton from '@/partials/AbandonCartButton/AbandonCartButton.vue'
 import AmazonPayButton from "@/public/components/AmazonPayButton.vue";
-import { vMaska } from "maska"
+import { vMaska } from "maska/vue"
 import FenixCheckout from '@/components/Fenix/FenixCheckout.vue';
 
 const CartsRepository = RepositoryFactory.get('carts')

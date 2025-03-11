@@ -1,10 +1,13 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-# AWS X-ray support
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
-from aws_xray_sdk.core import patch_all
+# OpenTelemetry support
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 
 from typing import Dict, List, Tuple, Union
@@ -27,8 +30,13 @@ import random
 import logging
 from datetime import datetime
 
-# X-ray setup
-patch_all()
+# OpenTelemetry setup
+trace.set_tracer_provider(TracerProvider())
+otlp_exporter = OTLPSpanExporter()
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+tracer = trace.get_tracer(__name__)
 
 NUM_DISCOUNTS = 2
 
@@ -340,8 +348,9 @@ app = Flask(__name__)
 logger = app.logger
 corps = CORS(app, expose_headers=['X-Experiment-Name', 'X-Experiment-Type', 'X-Experiment-Id', 'X-Personalize-Recipe'])
 
-xray_recorder.configure(service='Recommendations Service')
-XRayMiddleware(app, xray_recorder)
+# Initialize OpenTelemetry instrumentation
+FlaskInstrumentor().instrument_app(app)
+RequestsInstrumentor().instrument()
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(error):

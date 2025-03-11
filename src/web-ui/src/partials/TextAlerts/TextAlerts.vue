@@ -34,7 +34,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import { vMaska } from "maska"
+import { vMaska } from "maska/vue"
 
 import DemoGuideBadge from '@/components/DemoGuideBadge/DemoGuideBadge.vue';
 import { Articles } from '@/partials/AppModal/DemoGuide/config';
