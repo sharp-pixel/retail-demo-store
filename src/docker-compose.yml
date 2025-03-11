@@ -28,7 +28,7 @@ services:
     networks:
       - dev-net
     ports:
-      - 3001:3001
+      - "3001:3001"
 
   orders:
     container_name: orders
@@ -103,7 +103,7 @@ services:
 
   # OpenSearch required for search service
   opensearch:
-    image: opensearchproject/opensearch:1.3.3
+    image: opensearchproject/opensearch:2.19.1
     container_name: opensearch
     environment:
       - plugins.security.disabled=true
@@ -184,7 +184,7 @@ services:
     ports:
       - "8009:80"
 
-  # This service has it's own .env file at src/web-ui/.env
+  # This service has its own .env file at src/web-ui/.env
   web-ui:
     container_name: web-ui
     build:
@@ -222,7 +222,7 @@ services:
   xray:
     image: amazon/aws-xray-daemon
     ports:
-    - 2000:2000/udp
+    - "2000:2000/udp"
     environment:
       - AWS_PROFILE
       - AWS_DEFAULT_REGION
